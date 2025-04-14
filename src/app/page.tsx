@@ -3,22 +3,27 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { products } from "./data";
-import { useRazorpay } from "./hooks/useRazorpay";
+import { usePaymentGateway } from "./hooks/usePaymentGateway";
 
 export default function Home() {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+  const provider = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER;
+  console.log("Using payment provider:", provider);
 
-  const {handlePayment} = useRazorpay()
+  useEffect(() => {
+    if (provider === "razorpay") {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, [provider]);
+
+  const { handlePayment } = usePaymentGateway();
 
   return (
     <>
       <p className="text-gray-600 text-3xl mb-5">
-        This is payment using Razorpay SDK.
+        This is doing payment using Razorpay SDK.
       </p>
       <div className="min-h-screen flex flex-wrap items-center gap-2 bg-gray-50 p-6">
         {products?.map((item) => (
@@ -40,7 +45,7 @@ export default function Home() {
                 ₹{item?.amount}
               </p>
               <button
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
                 onClick={() => handlePayment(item.amount * 100, item?.name)}
               >
                 Buy Now
